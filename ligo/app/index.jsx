@@ -17,7 +17,7 @@ export default function WelcomeScreen() {
       <Text style={styles.subtitle}>Organic relationships in your pocket</Text>
 
       {/* Get Started Button */}
-      <Link href="/" style={styles.button}>
+      <Link href="/music" style={styles.button}>
         <Text style={styles.buttonText}>Get Started</Text>
       </Link>
 
