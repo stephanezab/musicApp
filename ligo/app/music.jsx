@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import { fetchFromAPI } from '../components/fetchFromAPI';
 
 export default function Music() {
@@ -12,7 +12,8 @@ export default function Music() {
   
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Top Spotify Tracks</Text>
+      
+      <Text style={styles.title}>Top Songs</Text>
       <FlatList
         data={tracks}
         keyExtractor={(item) => item.id}
@@ -20,6 +21,18 @@ export default function Music() {
           <View style={styles.trackContainer}>
             <Text style={styles.trackName}>{item.track.name}</Text>
             <Text style={styles.artistName}>{item.track.artists[0].name}</Text>
+          </View>
+        )}
+      />
+      <Text style={[styles.title, styles.topArtist]}>Top Artists</Text>
+      <FlatList
+      style = {styles.list}
+        data={tracks}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.trackContainer}>
+            
+            <Text style={styles.trackName}>{item.track.artists[0].name}</Text>
           </View>
         )}
       />
@@ -48,6 +61,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#2EC4B6',
     width: '100%',
+  },
+  list: {
+    width: '100%', // Ensures the FlatList container uses the full width
+  },
+  topArtist: {
+    marginTop: 40,
+
   },
   trackName: {
     fontSize: 18,

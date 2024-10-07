@@ -5,7 +5,7 @@ const URL = 'https://spotify23.p.rapidapi.com'
 const options = {
     method: 'GET',
     params: {
-        id: '5FVISU1dHQ7sjZSPykKOBw',
+        id: '37i9dQZF1DXcBWIGoYBM5M',
         offset: '0',
         limit: '100'
     },
