@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'green',
     borderStyle: 'solid',
-    borderRadius: '30',
+    borderRadius: '20',
   },
   button: {
     backgroundColor: '#2EC4B6',
