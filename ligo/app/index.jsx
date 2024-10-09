@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 export default function WelcomeScreen() {
+  const router = useRouter()
+
   return (
     <LinearGradient
       colors={['#000000', '#000000','#000000', '#1c6c4f', '#5ac18e']} // Adjusted gradient colors for a smooth blend
@@ -17,13 +19,13 @@ export default function WelcomeScreen() {
       <Text style={styles.subtitle}>Organic relationships in your pocket</Text>
 
       {/* Get Started Button */}
-      <Link href="/signIn" style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/signUp')}>
         <Text style={styles.buttonText}>Get Started</Text>
-      </Link>
+      </TouchableOpacity>
 
       {/* Login Text */}
       <Text style={styles.loginText}>
-        Already have an account? <Link href="/signUp" style={styles.loginLink}>Login here</Link>
+        Already have an account? <Link href="/signIn" style={styles.loginLink}>Login here</Link>
       </Text>
     </LinearGradient>
   );
