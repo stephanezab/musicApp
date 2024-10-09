@@ -17,13 +17,13 @@ export default function WelcomeScreen() {
       <Text style={styles.subtitle}>Organic relationships in your pocket</Text>
 
       {/* Get Started Button */}
-      <Link href="/music" style={styles.button}>
+      <Link href="/signIn" style={styles.button}>
         <Text style={styles.buttonText}>Get Started</Text>
       </Link>
 
       {/* Login Text */}
       <Text style={styles.loginText}>
-        Already have an account? <Link href="/" style={styles.loginLink}>Login here</Link>
+        Already have an account? <Link href="/signUp" style={styles.loginLink}>Login here</Link>
       </Text>
     </LinearGradient>
   );
