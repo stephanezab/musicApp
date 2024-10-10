@@ -16,7 +16,7 @@ export default function Music() {
       <Text style={styles.title}>Top Songs</Text>
       <FlatList
         data={tracks}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `track-${item.track.id}-${index}`}
         renderItem={({ item }) => (
           <View style={styles.trackContainer}>
             <Text style={styles.trackName}>{item.track.name}</Text>
@@ -28,7 +28,8 @@ export default function Music() {
       <FlatList
       style = {styles.list}
         data={tracks}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `artist-${item.track.artists[0].id}-${index}`
+        }
         renderItem={({ item }) => (
           <View style={styles.trackContainer}>
             
