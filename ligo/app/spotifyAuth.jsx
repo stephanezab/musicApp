@@ -5,7 +5,7 @@ import * as AuthSession from 'expo-auth-session';
 // import {EXPO_CLIENT_ID} from '@env';
 import Constants from 'expo-constants';
 
-// const client_id = "c8d4544eba96402fbff67f4ee6491d70";
+
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
 const scope = ['user-top-read', 'user-follow-read']; // Add scope for reading followed artists
