@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
       <Text style={styles.subtitle}>Organic relationships in your pocket</Text>
 
       {/* Get Started Button */}
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/signUp')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/spotifyAuth')}>
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
 
