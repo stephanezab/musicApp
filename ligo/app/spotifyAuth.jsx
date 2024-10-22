@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, Image, FlatList } from 'react-native';
+import { View, Text, Button, StyleSheet, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
 import axios from 'axios';
+import { Link, useRouter} from 'expo-router';
 import * as AuthSession from 'expo-auth-session';
 import Constants from 'expo-constants';
 import {saveUserData} from '../components/saveUsersDate';
 import {getUserData} from '../components/getUserDate';
 import { getUserLocation } from '../components/getUserLocation';
+import { useNavigation } from '@react-navigation/native';
 
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
@@ -20,6 +22,8 @@ export default function SpotifyAuthScreen() {
   const [userProfile, setUserProfile] = useState(null); // New state for user profile
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
   const [isLoadingArtists, setIsLoadingArtists] = useState(false);
+  const navigation = useNavigation();
+  const router = useRouter();
 
   const discovery = {
     authorizationEndpoint: 'https://accounts.spotify.com/authorize',
@@ -158,6 +162,16 @@ export default function SpotifyAuthScreen() {
       }
     }, [userProfile])
 
+    const handlesearch = () => {
+      if (userProfile) {
+        const id = userProfile.id
+        router.push({
+          pathname: '/displayMatches',
+          params: {id}, // Convert to string for easy transfer
+        });
+      }
+    };
+
 
 
   const renderTrackItem = ({ item }) => (
@@ -210,6 +224,9 @@ export default function SpotifyAuthScreen() {
               style={styles.list}
             />
           )}
+          <TouchableOpacity style={styles.searchButton} onPress={handlesearch}>
+        <Text style={styles.buttonText}>Sign In</Text>
+      </TouchableOpacity>
         </>
       ) : (
         <Button
@@ -280,4 +297,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '50%',
   },
+  searchButton: {
+    backgroundColor: '#2EC4B6',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+  }
 });

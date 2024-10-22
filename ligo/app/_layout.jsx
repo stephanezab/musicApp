@@ -9,6 +9,7 @@ export default function Layout() {
       <Stack.Screen name="signIn" options={{ headerShown: false }} />
       <Stack.Screen name="signUp" options={{ headerShown: false }} />
       <Stack.Screen name="spotifyAuth" options={{ headerShown: false }} />
+      <Stack.Screen name="displayMatches" options={{ headerShown: false }} />
     </Stack>
   );
 }
