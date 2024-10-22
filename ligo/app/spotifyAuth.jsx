@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Image, FlatList } from 'react-native';
 import axios from 'axios';
 import * as AuthSession from 'expo-auth-session';
-// import {EXPO_CLIENT_ID} from '@env';
 import Constants from 'expo-constants';
-
+import {saveUserData} from '../components/saveUsersDate';
+import {getUserData} from '../components/getUserDate';
+import { getUserLocation } from '../components/getUserLocation';
 
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
-const scope = ['user-top-read', 'user-follow-read']; // Add scope for reading followed artists
-console.log("cliend:" + client_id)
+const scope = ['user-top-read', 'user-follow-read', 'user-read-private']; // Add scope for reading followed artists and user profile
 
 export default function SpotifyAuthScreen() {
   const [accessToken, setAccessToken] = useState('');
@@ -17,12 +17,10 @@ export default function SpotifyAuthScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [tracks, setTracks] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [userProfile, setUserProfile] = useState(null); // New state for user profile
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
   const [isLoadingArtists, setIsLoadingArtists] = useState(false);
 
-  console.log("Redirect URI:", redirect_uri);
-
-  // Step 1: Define the authorization request configuration
   const discovery = {
     authorizationEndpoint: 'https://accounts.spotify.com/authorize',
     tokenEndpoint: 'https://accounts.spotify.com/api/token',
@@ -39,7 +37,6 @@ export default function SpotifyAuthScreen() {
     discovery
   );
 
-  // Handle the response from the Spotify authorization endpoint
   useEffect(() => {
     if (response?.type === 'success') {
       const { code } = response.params;
@@ -47,7 +44,6 @@ export default function SpotifyAuthScreen() {
     }
   }, [response]);
 
-  // Exchange the authorization code for an access token
   const getAccessToken = async (code) => {
     try {
       const response = await axios.post('https://accounts.spotify.com/api/token', null, {
@@ -68,7 +64,20 @@ export default function SpotifyAuthScreen() {
     }
   };
 
-  // Fetch the user's top tracks from Spotify
+  const fetchUserProfile = async () => {
+    if (!accessToken) return;
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setUserProfile(response.data); // Save the user profile data
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   const fetchTopTracks = async () => {
     if (!accessToken) {
       return;
@@ -87,7 +96,6 @@ export default function SpotifyAuthScreen() {
     setIsLoadingTracks(false);
   };
 
-  // Fetch the artists that the user follows
   const fetchFollowedArtists = async () => {
     if (!accessToken) {
       return;
@@ -106,23 +114,52 @@ export default function SpotifyAuthScreen() {
     setIsLoadingArtists(false);
   };
 
-  // Trigger access token retrieval after receiving the authorization code
   useEffect(() => {
     if (authorizationCode) {
       getAccessToken(authorizationCode);
     }
   }, [authorizationCode]);
 
-  // Fetch user's top tracks and followed artists once access token is set
   useEffect(() => {
     if (accessToken) {
       setIsLoggedIn(true);
+      fetchUserProfile(); // Fetch user profile after logging in
       fetchTopTracks();
       fetchFollowedArtists();
     }
   }, [accessToken]);
 
-  // Render item function for FlatList - Top Tracks
+    // Save user data once profile, tracks, and artists are fetched
+    useEffect(() => {
+      const fetchLocationAndSaveUserData = async () => {
+        if (userProfile && tracks.length > 0 && artists.length > 0) {
+            const userId = userProfile.id;
+            const userName = userProfile.display_name;
+            const topSongs = tracks.map((track) => track.name);
+            const favoriteArtists = artists.map((artist) => artist.name);
+
+            // Await the async function to get the location
+            const { latitude, longitude } = await getUserLocation();
+            console.log(latitude, longitude);
+            
+            // Call the function to save user data with the location
+            saveUserData(userId, userName, latitude, longitude, topSongs, favoriteArtists);
+        }
+    };
+
+    fetchLocationAndSaveUserData();
+  
+    }, [userProfile, tracks, artists]);
+
+    useEffect(()=>{
+      if (userProfile){
+        
+        getUserData(userProfile.id)
+      }
+    }, [userProfile])
+
+
+
   const renderTrackItem = ({ item }) => (
     <View style={styles.trackContainer}>
       <Text style={styles.trackName}>{item.name}</Text>
@@ -130,13 +167,12 @@ export default function SpotifyAuthScreen() {
     </View>
   );
 
-  // Render item function for FlatList - Followed Artists
   const renderArtistItem = ({ item }) => (
     <View style={styles.artistContainer}>
       {item.images.length > 0 && (
         <Image source={{ uri: item.images[0].url }} style={styles.artistImage} />
       )}
-      <Text style={styles.artistName}>{"   "+ item.name}</Text>
+      <Text style={styles.artistName}>{"   " + item.name}</Text>
     </View>
   );
 
@@ -144,6 +180,13 @@ export default function SpotifyAuthScreen() {
     <View style={styles.container}>
       {isLoggedIn ? (
         <>
+          {userProfile && (
+            <View style={styles.userProfileContainer}>
+              <Text style={styles.userProfileText}>User ID: {userProfile.id}</Text>
+              <Text style={styles.userProfileText}>Name: {userProfile.display_name}</Text>
+            </View>
+          )}
+
           <Text style={styles.title}>Top Tracks</Text>
           {isLoadingTracks ? (
             <ActivityIndicator size="large" color="#00ff00" />
@@ -161,7 +204,6 @@ export default function SpotifyAuthScreen() {
             <ActivityIndicator size="large" color="#00ff00" />
           ) : (
             <FlatList
-            
               data={artists}
               renderItem={renderArtistItem}
               keyExtractor={(item, index) => index.toString()}
@@ -191,6 +233,14 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     paddingBottom: 70,
+  },
+  userProfileContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  userProfileText: {
+    fontSize: 18,
+    color: '#FFFFFF',
   },
   title: {
     fontSize: 24,
@@ -228,7 +278,6 @@ const styles = StyleSheet.create({
   },
   list: {
     width: '100%',
-    height: '50%'
+    height: '50%',
   },
 });
-
