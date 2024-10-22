@@ -29,7 +29,7 @@ export default function displayMatches() {
             setUsersfound(list)
 
         } catch (error) {
-            console.log("Error get users ", error);
+            console.log("Error get users nearby", error);
         }
 
     }
