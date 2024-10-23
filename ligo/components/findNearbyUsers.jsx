@@ -15,6 +15,7 @@ export const findNearbyUsers = async(currentLat, currentLon, userId, maxDistance
       }
   
       const userData = doc.data();
+    
       const { latitude, longitude } = userData.location;
       const distance = findDistance(currentLat, currentLon, latitude, longitude);
   
@@ -22,8 +23,9 @@ export const findNearbyUsers = async(currentLat, currentLon, userId, maxDistance
         nearbyUsers.push({
           userId: doc.id,
           distance: distance,
-          topSongs: userData.topSongs,
-          favoriteArtists: userData.favoriteArtists
+          name: userData.name
+        //   topSongs: userData.topSongs,
+        //   favoriteArtists: userData.favoriteArtists
         });
       }
     });
