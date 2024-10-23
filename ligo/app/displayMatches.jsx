@@ -50,6 +50,7 @@ export default function displayMatches() {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.title}>Friends Nearby Found</Text>
             <FlatList
                 data={usersfound}
                 keyExtractor={(item) => item.userId}
@@ -70,6 +71,12 @@ const styles = StyleSheet.create({
         padding: 20,
         paddingTop: 60,
         paddingBottom: 70,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        marginBottom: 20,
     },
     userContainer: {
         padding: 10,
