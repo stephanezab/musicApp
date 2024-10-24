@@ -8,12 +8,16 @@ export const getUserData = async(userId) => {
 
     if (docSnap.exists()) {
       console.log("User data:", docSnap.data());
+      return docSnap.data();
     } else {
       console.log("No such document!");
     }
+
   } catch (e) {
     console.error("Error fetching user data: ", e);
   }
+
+  
 }
 
 

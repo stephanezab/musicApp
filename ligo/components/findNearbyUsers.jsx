@@ -19,14 +19,14 @@ export const findNearbyUsers = async(currentLat, currentLon, userId, maxDistance
       const { latitude, longitude } = userData.location;
       const distance = findDistance(currentLat, currentLon, latitude, longitude);
       console.log("distance" + distance)
-      
+
       if (distance <= maxDistance) {
         nearbyUsers.push({
           userId: doc.id,
           distance: distance,
-          name: userData.name
+          name: userData.name,
         //   topSongs: userData.topSongs,
-        //   favoriteArtists: userData.favoriteArtists
+          favoriteArtists: userData.favoriteArtists
         });
       }
     });

@@ -3,9 +3,13 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { getUserLocation } from '../components/getUserLocation';
 import { findNearbyUsers } from '../components/findNearbyUsers';
+import {findMatchingUsers} from '../components/findMatchingUsers';
+import {getUserData} from '../components/getUserDate';
 
 export default function displayMatches() {
+    const [usersfoundByLocation, setUsersfoundByLocation] = useState([]);
     const [usersfound, setUsersfound] = useState([]);
+    const [currUserData, setcurrUserData] = useState({})
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
 
@@ -25,13 +29,28 @@ export default function displayMatches() {
         if (latitude !== null && longitude !== null) {
             try {
                 const list = await findNearbyUsers(latitude, longitude, id); 
-                setUsersfound(list);
-                console.log(list);
+                setUsersfoundByLocation(list);
+                console.log("=============" +list[0]);
             } catch (error) {
                 console.log("Error getting users nearby", error);
             }
         }
     };
+
+    // Get current user Data
+    const getcurrUserData = async () =>{
+        
+        try {
+            const data = await getUserData(id);
+            console.log(data);
+            setcurrUserData(data);
+
+        } catch (error) {
+            console.log("Error getting current user data (displayMatches)", error);
+        }
+
+
+    }
 
     useEffect(() => {
         getcurrentLocation();
@@ -41,9 +60,25 @@ export default function displayMatches() {
         getusers();
     }, [latitude, longitude]);
 
+    useEffect(() => {
+        getcurrUserData()
+        
+    }, [id]);
+
+
+    useEffect(() => {
+        let users = findMatchingUsers(currUserData.favoriteArtists,usersfoundByLocation)
+        console.log("matches: " + users);
+        setUsersfound(users);
+
+    }, [usersfoundByLocation]);
+
+    
+
     const renderUserItem = ({ item }) => (
         <View style={styles.userContainer}>
             <Text style={styles.userName}>{item.name}</Text>
+            <Text style={styles.userName}>{item.matchPer}%</Text>
             <Text style={styles.userDistance}>{item.distance.toFixed(2)} miles</Text>
         </View>
     );

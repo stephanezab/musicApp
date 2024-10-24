@@ -144,7 +144,7 @@ export default function SpotifyAuthScreen() {
 
             // Await the async function to get the location
             const { latitude, longitude } = await getUserLocation();
-            console.log(latitude, longitude);
+            // console.log(latitude, longitude);
             
             // Call the function to save user data with the location
             saveUserData(userId, userName, latitude, longitude, topSongs, favoriteArtists);
@@ -155,12 +155,12 @@ export default function SpotifyAuthScreen() {
   
     }, [userProfile, tracks, artists]);
 
-    useEffect(()=>{
-      if (userProfile){
+    // useEffect(()=>{
+    //   if (userProfile){
         
-        getUserData(userProfile.id)
-      }
-    }, [userProfile])
+    //     getUserData(userProfile.id)
+    //   }
+    // }, [userProfile])
 
     const handlesearch = () => {
       if (userProfile) {
