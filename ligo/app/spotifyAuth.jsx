@@ -194,12 +194,12 @@ export default function SpotifyAuthScreen() {
     <View style={styles.container}>
       {isLoggedIn ? (
         <>
-          {userProfile && (
+          {/* {userProfile && (
             <View style={styles.userProfileContainer}>
               <Text style={styles.userProfileText}>User ID: {userProfile.id}</Text>
               <Text style={styles.userProfileText}>Name: {userProfile.display_name}</Text>
             </View>
-          )}
+          )} */}
 
           <Text style={styles.title}>Top Tracks</Text>
           {isLoadingTracks ? (
@@ -225,7 +225,7 @@ export default function SpotifyAuthScreen() {
             />
           )}
           <TouchableOpacity style={styles.searchButton} onPress={handlesearch}>
-        <Text style={styles.buttonText}>Sign In</Text>
+        <Text style={styles.buttonText}>Search Friends</Text>
       </TouchableOpacity>
         </>
       ) : (
