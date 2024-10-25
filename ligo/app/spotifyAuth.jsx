@@ -6,6 +6,7 @@ import * as AuthSession from 'expo-auth-session';
 import Constants from 'expo-constants';
 import {saveUserData} from '../components/saveUsersDate';
 import {getUserData} from '../components/getUserDate';
+import { fetchFromAPI } from '../components/fetchFromAPI';
 import { getUserLocation } from '../components/getUserLocation';
 import { useNavigation } from '@react-navigation/native';
 
@@ -76,6 +77,7 @@ export default function SpotifyAuthScreen() {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+      
       setUserProfile(response.data); // Save the user profile data
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -88,12 +90,14 @@ export default function SpotifyAuthScreen() {
     }
     setIsLoadingTracks(true);
     try {
-      const response = await axios.get('https://api.spotify.com/v1/me/top/tracks', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      setTracks(response.data.items);
+      // const response = await axios.get('https://api.spotify.com/v1/me/top/tracks', {
+      //   headers: {
+      //     Authorization: `Bearer ${accessToken}`,
+      //   },
+      // });
+      const data = await fetchFromAPI('top/tracks', accessToken);
+
+      setTracks(data.items);
     } catch (error) {
       console.error('Error fetching top tracks:', error);
     }
@@ -106,12 +110,13 @@ export default function SpotifyAuthScreen() {
     }
     setIsLoadingArtists(true);
     try {
-      const response = await axios.get('https://api.spotify.com/v1/me/following?type=artist', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      setArtists(response.data.artists.items);
+      // const response = await axios.get('https://api.spotify.com/v1/me/following?type=artist', {
+      //   headers: {
+      //     Authorization: `Bearer ${accessToken}`,
+      //   },
+      // });
+      const data = await fetchFromAPI('following?type=artist', accessToken);
+      setArtists(data.artists.items);
     } catch (error) {
       console.error('Error fetching followed artists:', error);
     }
