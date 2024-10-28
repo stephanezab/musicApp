@@ -7,6 +7,7 @@ import Constants from 'expo-constants';
 import {saveUserData} from '../components/saveUsersDate';
 import {getUserData} from '../components/getUserDate';
 import { fetchFromAPI } from '../components/fetchFromAPI';
+import {getAccessToken} from '../components/getAccessToken';
 import { getUserLocation } from '../components/getUserLocation';
 import { useNavigation } from '@react-navigation/native';
 
@@ -49,21 +50,23 @@ export default function SpotifyAuthScreen() {
     }
   }, [response]);
 
-  const getAccessToken = async (code) => {
+  const getToken = async (code) => {
     try {
-      const response = await axios.post('https://accounts.spotify.com/api/token', null, {
-        params: {
-          grant_type: 'authorization_code',
-          code: code,
-          redirect_uri: redirect_uri,
-          client_id: client_id,
-          code_verifier: request?.codeVerifier, // PKCE
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-      setAccessToken(response.data.access_token);
+      // const response = await axios.post('https://accounts.spotify.com/api/token', null, {
+      //   params: {
+      //     grant_type: 'authorization_code',
+      //     code: code,
+      //     redirect_uri: redirect_uri,
+      //     client_id: client_id,
+      //     code_verifier: request?.codeVerifier, // PKCE
+      //   },
+      //   headers: {
+      //     'Content-Type': 'application/x-www-form-urlencoded',
+      //   },
+      // });
+      const data = await getAccessToken(code, redirect_uri, client_id, request); 
+
+      setAccessToken(data.access_token);
     } catch (error) {
       console.error('Error fetching access token:', error);
     }
@@ -125,7 +128,7 @@ export default function SpotifyAuthScreen() {
 
   useEffect(() => {
     if (authorizationCode) {
-      getAccessToken(authorizationCode);
+      getToken(authorizationCode);
     }
   }, [authorizationCode]);
 
