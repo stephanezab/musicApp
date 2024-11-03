@@ -67,7 +67,7 @@ export default function displayMatches() {
 
 
     useEffect(() => {
-        let users = findMatchingUsers(currUserData.favoriteArtists,usersfoundByLocation)
+        let users = findMatchingUsers(currUserData, usersfoundByLocation)
         console.log("matches: " + users);
         setUsersfound(users);
 

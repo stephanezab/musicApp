@@ -119,6 +119,21 @@ export default function SpotifyAuthScreen() {
       //   },
       // });
       const data = await fetchFromAPI('following?type=artist', accessToken);
+      const genreCounts = {};
+
+      data.artists.items.forEach(artist => {
+        artist.genres.forEach(genre => {
+            genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+        });
+    });
+
+    let sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);;
+
+    sortedGenres = Object.fromEntries(sortedGenres);
+
+    console.log("genre====: " + JSON.stringify(sortedGenres));
+
+
       setArtists(data.artists.items);
     } catch (error) {
       console.error('Error fetching followed artists:', error);
@@ -194,7 +209,12 @@ export default function SpotifyAuthScreen() {
       {item.images.length > 0 && (
         <Image source={{ uri: item.images[0].url }} style={styles.artistImage} />
       )}
-      <Text style={styles.artistName}>{"   " + item.name}</Text>
+     <View style={styles.artistInfoContainer}>
+      <Text style={styles.artistName}>{item.name}</Text>
+      <Text style={styles.artistGenres}>
+        {item.genres && item.genres.length > 0 ? item.genres.join(', ') : 'No genres available'}
+      </Text>
+    </View>
     </View>
   );
 
@@ -300,6 +320,15 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+  },
+  artistGenres: {
+    fontSize: 12,
+    color: '#A0A0A0',
+    marginTop: 10,
+  },
+  artistInfoContainer: {
+    marginLeft: 10,  // Adjust as needed for spacing
+    flex: 1,
   },
   list: {
     width: '100%',
