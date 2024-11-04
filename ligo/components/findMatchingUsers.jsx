@@ -8,10 +8,11 @@ const THRESHOLD_GENRE = 0.5;
 // }
 
 function calculateJaccardIndex(setA, setB) {
-    const intersection = setA.filter(x => setB.includes(x)).length;
-    const union = new Set([...setA, ...setB]).size;
-    console.log(intersection/ union)
-    return intersection / union;
+    const commonElements = setA.filter(x => setB.includes(x));
+    const intersectionSize = commonElements.length;
+    const unionSize = new Set([...setA, ...setB]).size;
+    const score = intersectionSize / unionSize;
+    return { score, commonElements }; // Return both score and common elements
 }
 
 function calculateCosineSimilarity(vectorA, vectorB) {
@@ -27,40 +28,42 @@ function calculateCosineSimilarity(vectorA, vectorB) {
 
 function calculateCompatibility(data1, data2) {
 
-    // Step 2.1: Artist Overlap
-    const artistOverlapScore = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
-    if (artistOverlapScore >= THRESHOLD_ARTIST) {
-        return artistOverlapScore; // High compatibility based on artists
-    }
-
-    // Step 2.2: Song Overlap
-    const songOverlapScore = calculateJaccardIndex(data1.topSongs, data2.topSongs);
-    if (songOverlapScore >= THRESHOLD_SONG) {
-        return songOverlapScore; // Moderate compatibility based on songs
-    }
-
-    // // Step 2.3: Genre Overlap
-    const genreSimilarityScore = calculateCosineSimilarity(data1.genreProfile, data2.genreProfile);
-    if (genreSimilarityScore >= THRESHOLD_GENRE) {
-        return genreSimilarityScore; // Moderate compatibility based on songs
-    }
-
-    return 0; // Compatibility based on genres if previous scores were low
+     // Step 2.1: Artist Overlap
+     const artistOverlap = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
+     if (artistOverlap.score >= THRESHOLD_ARTIST) {
+         return { score: artistOverlap.score, matchType: 'artist', matches: artistOverlap.commonElements };
+     }
+ 
+     // Step 2.2: Song Overlap
+    //  const songOverlap = calculateJaccardIndex(data1.topSongs, data2.topSongs);
+    //  if (songOverlap.score >= THRESHOLD_SONG) {
+    //      return { score: songOverlap.score, matchType: 'song', matches: songOverlap.commonElements };
+    //  }
+ 
+    //  // Step 2.3: Genre Overlap
+    //  const genreSimilarityScore = calculateCosineSimilarity(data1.genreProfile, data2.genreProfile);
+    //  if (genreSimilarityScore >= THRESHOLD_GENRE) {
+    //      return { score: genreSimilarityScore, matchType: 'genre', matches: [] }; // No exact "common" genres, just similarity
+    //  }
+ 
+     return { score: 0, matchType: null, matches: [] }; // No significant compatibility found
 }
 
 export const findMatchingUsers = (currUser, nearbyUsers) => {
     let matchingUsers = []
 
     nearbyUsers.forEach((user) => {
-        let comp = calculateCompatibility(currUser, user);
+        const compatibility = calculateCompatibility(currUser, user);
 
-        let perc = comp * 100;
+        const perc = compatibility.score * 100;
 
         matchingUsers.push({
             userId: user.userId,
             distance: user.distance,
             name: user.name,
-            matchPer: perc
+            matchPer: perc,
+            matchType: compatibility.matchType,
+            matches: compatibility.matches
         })
     });
 

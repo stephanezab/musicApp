@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { getUserLocation } from '../components/getUserLocation';
 import { findNearbyUsers } from '../components/findNearbyUsers';
-import {findMatchingUsers} from '../components/findMatchingUsers';
-import {getUserData} from '../components/getUserDate';
+import { findMatchingUsers } from '../components/findMatchingUsers';
+import { getUserData } from '../components/getUserData';
 
-export default function displayMatches() {
+export default function DisplayMatches() {
     const [usersfoundByLocation, setUsersfoundByLocation] = useState([]);
     const [usersfound, setUsersfound] = useState([]);
-    const [currUserData, setcurrUserData] = useState({})
+    const [currUserData, setcurrUserData] = useState({});
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
 
@@ -30,27 +30,20 @@ export default function displayMatches() {
             try {
                 const list = await findNearbyUsers(latitude, longitude, id); 
                 setUsersfoundByLocation(list);
-                console.log("=============" +list[0]);
             } catch (error) {
                 console.log("Error getting users nearby", error);
             }
         }
     };
 
-    // Get current user Data
-    const getcurrUserData = async () =>{
-        
+    const getcurrUserData = async () => {
         try {
             const data = await getUserData(id);
-            console.log(data);
             setcurrUserData(data);
-
         } catch (error) {
             console.log("Error getting current user data (displayMatches)", error);
         }
-
-
-    }
+    };
 
     useEffect(() => {
         getcurrentLocation();
@@ -61,25 +54,27 @@ export default function displayMatches() {
     }, [latitude, longitude]);
 
     useEffect(() => {
-        getcurrUserData()
-        
+        getcurrUserData();
     }, [id]);
 
-
     useEffect(() => {
-        let users = findMatchingUsers(currUserData, usersfoundByLocation)
-        console.log("matches: " + users);
-        setUsersfound(users);
-
-    }, [usersfoundByLocation]);
-
-    
+        if (usersfoundByLocation.length > 0 && currUserData) {
+            const users = findMatchingUsers(currUserData, usersfoundByLocation);
+            setUsersfound(users);
+        }
+    }, [usersfoundByLocation, currUserData]);
 
     const renderUserItem = ({ item }) => (
         <View style={styles.userContainer}>
             <Text style={styles.userName}>{item.name}</Text>
-            <Text style={styles.userName}>{item.matchPer}%</Text>
+            <Text style={styles.matchPercentage}>{item.matchPer.toFixed(1)}%</Text>
             <Text style={styles.userDistance}>{item.distance.toFixed(2)} miles</Text>
+            <Text style={styles.matchType}>Match by: {item.matchType}</Text>
+            {item.matches.length > 0 && (
+                <Text style={styles.matches}>
+                    Matches: {item.matches.join(', ')}
+                </Text>
+            )}
         </View>
     );
 
@@ -115,9 +110,8 @@ const styles = StyleSheet.create({
     },
     userContainer: {
         padding: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
         borderBottomWidth: 1,
         borderBottomColor: '#2EC4B6',
         width: '100%',
@@ -126,9 +120,23 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#FFFFFF',
     },
+    matchPercentage: {
+        fontSize: 16,
+        color: '#FFFFFF',
+    },
     userDistance: {
         fontSize: 14,
         color: '#A0A0A0',
+    },
+    matchType: {
+        fontSize: 14,
+        color: '#2EC4B6',
+        marginTop: 5,
+    },
+    matches: {
+        fontSize: 14,
+        color: '#A0A0A0',
+        marginTop: 2,
     },
     list: {
         width: '100%',

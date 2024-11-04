@@ -5,7 +5,7 @@ import { Link, useRouter} from 'expo-router';
 import * as AuthSession from 'expo-auth-session';
 import Constants from 'expo-constants';
 import {saveUserData} from '../components/saveUsersDate';
-import {getUserData} from '../components/getUserDate';
+import {getUserData} from '../components/getUserData';
 import { fetchFromAPI } from '../components/fetchFromAPI';
 import {getAccessToken} from '../components/getAccessToken';
 import { getUserLocation } from '../components/getUserLocation';
