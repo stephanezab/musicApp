@@ -8,6 +8,8 @@ const THRESHOLD_GENRE = 0.5;
 // }
 
 function calculateJaccardIndex(setA, setB) {
+    // console.log("setA",setA);
+    // console.log("setB",setB);
     const commonElements = setA.filter(x => setB.includes(x));
     const intersectionSize = commonElements.length;
     const unionSize = new Set([...setA, ...setB]).size;
@@ -29,16 +31,19 @@ function calculateCosineSimilarity(vectorA, vectorB) {
 function calculateCompatibility(data1, data2) {
 
      // Step 2.1: Artist Overlap
+
      const artistOverlap = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
+     
      if (artistOverlap.score >= THRESHOLD_ARTIST) {
          return { score: artistOverlap.score, matchType: 'artist', matches: artistOverlap.commonElements };
      }
- 
+     
      // Step 2.2: Song Overlap
-    //  const songOverlap = calculateJaccardIndex(data1.topSongs, data2.topSongs);
-    //  if (songOverlap.score >= THRESHOLD_SONG) {
-    //      return { score: songOverlap.score, matchType: 'song', matches: songOverlap.commonElements };
-    //  }
+     const songOverlap = calculateJaccardIndex(data1.topSongs, data2.topSongs);
+     console.log("song part",songOverlap);
+     if (songOverlap.score >= THRESHOLD_SONG) {
+         return { score: songOverlap.score, matchType: 'song', matches: songOverlap.commonElements };
+     }
  
     //  // Step 2.3: Genre Overlap
     //  const genreSimilarityScore = calculateCosineSimilarity(data1.genreProfile, data2.genreProfile);

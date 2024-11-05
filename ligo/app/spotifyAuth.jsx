@@ -103,7 +103,7 @@ export default function SpotifyAuthScreen() {
       //     Authorization: `Bearer ${accessToken}`,
       //   },
       // });
-      const data = await fetchFromAPI('top/tracks', accessToken);
+      const data = await fetchFromAPI('top/tracks?offset=0&limit=10', accessToken);
       setTracks(data.items);
 
       const artistIds = [...new Set(data.items.flatMap(track => track.artists.map(artist => artist.id)))];
