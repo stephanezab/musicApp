@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import { Link, useRouter} from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import * as AuthSession from 'expo-auth-session';
 import Constants from 'expo-constants';
-import {saveUserData} from '../components/saveUsersDate';
-import {getUserData} from '../components/getUserData';
+import { saveUserData } from '../components/saveUsersDate';
+import { getUserData } from '../components/getUserData';
 import { fetchFromAPI } from '../components/fetchFromAPI';
-import {getAccessToken} from '../components/getAccessToken';
+import { getAccessToken } from '../components/getAccessToken';
 import { getUserLocation } from '../components/getUserLocation';
 import { useNavigation } from '@react-navigation/native';
 
@@ -21,6 +21,11 @@ export default function SpotifyAuthScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [tracks, setTracks] = useState([]);
   const [artists, setArtists] = useState([]);
+
+  const [extsongGenres, setExtsongGenres] = useState({});
+  const [extartistGenres, setExtartistGenres] = useState({});
+  const [Genres, setGenres] = useState({});
+
   const [userProfile, setUserProfile] = useState(null); // New state for user profile
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
   const [isLoadingArtists, setIsLoadingArtists] = useState(false);
@@ -64,7 +69,7 @@ export default function SpotifyAuthScreen() {
       //     'Content-Type': 'application/x-www-form-urlencoded',
       //   },
       // });
-      const data = await getAccessToken(code, redirect_uri, client_id, request); 
+      const data = await getAccessToken(code, redirect_uri, client_id, request);
 
       setAccessToken(data.access_token);
     } catch (error) {
@@ -80,7 +85,7 @@ export default function SpotifyAuthScreen() {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      
+
       setUserProfile(response.data); // Save the user profile data
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -99,8 +104,28 @@ export default function SpotifyAuthScreen() {
       //   },
       // });
       const data = await fetchFromAPI('top/tracks', accessToken);
-
       setTracks(data.items);
+
+      const artistIds = [...new Set(data.items.flatMap(track => track.artists.map(artist => artist.id)))];
+
+      const genres = {};
+
+      for (const artistId of artistIds) {
+
+        const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const artistData = await artistResponse.json();
+
+        artistData.genres.forEach(genre => {
+          genres[genre] = (genres[genre] || 0) + 1; // Counting genre occurrences
+        });
+      }
+      // console.log("genres from songs====", genres);
+      setExtsongGenres(genres);
+
     } catch (error) {
       console.error('Error fetching top tracks:', error);
     }
@@ -123,15 +148,16 @@ export default function SpotifyAuthScreen() {
 
       data.artists.items.forEach(artist => {
         artist.genres.forEach(genre => {
-            genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
         });
-    });
+      });
 
-    let sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);;
+      // let sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    sortedGenres = Object.fromEntries(sortedGenres);
+      // sortedGenres = Object.fromEntries(sortedGenres);
 
-    console.log("genre====: " + JSON.stringify(sortedGenres));
+      // console.log("genre artist====: " + JSON.stringify(genreCounts));
+      setExtartistGenres(genreCounts);
 
 
       setArtists(data.artists.items);
@@ -156,44 +182,64 @@ export default function SpotifyAuthScreen() {
     }
   }, [accessToken]);
 
-    // Save user data once profile, tracks, and artists are fetched
-    useEffect(() => {
-      const fetchLocationAndSaveUserData = async () => {
-        if (userProfile && tracks.length > 0 && artists.length > 0) {
-            const userId = userProfile.id;
-            const userName = userProfile.display_name;
-            const topSongs = tracks.map((track) => track.name);
-            const favoriteArtists = artists.map((artist) => artist.name);
+  // Save user data once profile, tracks, and artists are fetched
+  useEffect(() => {
+    const fetchLocationAndSaveUserData = async () => {
+      if (userProfile && tracks.length > 0 && artists.length > 0) {
+        const userId = userProfile.id;
+        const userName = userProfile.display_name;
+        const topSongs = tracks.map((track) => track.name);
+        const favoriteArtists = artists.map((artist) => artist.name);
 
-            // Await the async function to get the location
-            const { latitude, longitude } = await getUserLocation();
-            // console.log(latitude, longitude);
-            
-            // Call the function to save user data with the location
-            saveUserData(userId, userName, latitude, longitude, topSongs, favoriteArtists);
-        }
+        // Await the async function to get the location
+        const { latitude, longitude } = await getUserLocation();
+        // console.log(latitude, longitude);
+
+        // Call the function to save user data with the location
+        saveUserData(userId, userName, latitude, longitude, topSongs, favoriteArtists, Genres);
+      }
     };
 
     fetchLocationAndSaveUserData();
-  
-    }, [userProfile, tracks, artists]);
 
-    // useEffect(()=>{
-    //   if (userProfile){
-        
-    //     getUserData(userProfile.id)
-    //   }
-    // }, [userProfile])
+  }, [userProfile, tracks, artists, Genres]);
 
-    const handlesearch = () => {
-      if (userProfile) {
-        const id = userProfile.id
-        router.push({
-          pathname: '/displayMatches',
-          params: {id}, // Convert to string for easy transfer
-        });
+  // useEffect(()=>{
+  //   if (userProfile){
+
+  //     getUserData(userProfile.id)
+  //   }
+  // }, [userProfile])
+
+  useEffect(() => {
+    if (Object.keys(extartistGenres).length > 0 && Object.keys(extsongGenres).length > 0) {
+
+      let combinedGenres = { ...extsongGenres };
+      for (const genre in extartistGenres) {
+        combinedGenres[genre] = (combinedGenres[genre] || 0) + extartistGenres[genre];
       }
-    };
+
+      let sortedGenres = Object.entries(combinedGenres).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+      sortedGenres = Object.fromEntries(sortedGenres);
+
+      console.log("the combine==", sortedGenres);
+      setGenres(sortedGenres);
+    }
+
+
+  }, [extartistGenres, extsongGenres])
+
+
+  const handlesearch = () => {
+    if (userProfile) {
+      const id = userProfile.id
+      router.push({
+        pathname: '/displayMatches',
+        params: { id }, // Convert to string for easy transfer
+      });
+    }
+  };
 
 
 
@@ -209,12 +255,12 @@ export default function SpotifyAuthScreen() {
       {item.images.length > 0 && (
         <Image source={{ uri: item.images[0].url }} style={styles.artistImage} />
       )}
-     <View style={styles.artistInfoContainer}>
-      <Text style={styles.artistName}>{item.name}</Text>
-      <Text style={styles.artistGenres}>
-        {item.genres && item.genres.length > 0 ? item.genres.join(', ') : 'No genres available'}
-      </Text>
-    </View>
+      <View style={styles.artistInfoContainer}>
+        <Text style={styles.artistName}>{item.name}</Text>
+        <Text style={styles.artistGenres}>
+          {item.genres && item.genres.length > 0 ? item.genres.join(', ') : 'No genres available'}
+        </Text>
+      </View>
     </View>
   );
 
@@ -253,8 +299,8 @@ export default function SpotifyAuthScreen() {
             />
           )}
           <TouchableOpacity style={styles.searchButton} onPress={handlesearch}>
-        <Text style={styles.buttonText}>Search Friends</Text>
-      </TouchableOpacity>
+            <Text style={styles.buttonText}>Search Friends</Text>
+          </TouchableOpacity>
         </>
       ) : (
         <Button
