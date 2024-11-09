@@ -26,7 +26,8 @@ export const findNearbyUsers = async(currentLat, currentLon, userId, maxDistance
           distance: distance,
           name: userData.name,
           topSongs: userData.topSongs,
-          favoriteArtists: userData.favoriteArtists
+          favoriteArtists: userData.favoriteArtists,
+          genreProfile: userData.genreProfile
         });
       }
     });

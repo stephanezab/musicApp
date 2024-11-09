@@ -43,6 +43,7 @@ export default function SpotifyAuthScreen() {
       redirectUri: redirect_uri,
       scopes: [scope],
       responseType: 'code',
+      show_dialog: true,
       usePKCE: true, // For PKCE flow
     },
     discovery
@@ -52,6 +53,7 @@ export default function SpotifyAuthScreen() {
     if (response?.type === 'success') {
       const { code } = response.params;
       setAuthorizationCode(code);
+
     }
   }, [response]);
 
@@ -70,7 +72,7 @@ export default function SpotifyAuthScreen() {
       //   },
       // });
       const data = await getAccessToken(code, redirect_uri, client_id, request);
-
+      console.log("define the scope",data.scope);
       setAccessToken(data.access_token);
     } catch (error) {
       console.error('Error fetching access token:', error);
@@ -104,6 +106,8 @@ export default function SpotifyAuthScreen() {
       //   },
       // });
       const data = await fetchFromAPI('top/tracks?offset=0&limit=10', accessToken);
+
+      //console.log("top tracks===",data.items);
       setTracks(data.items);
 
       const artistIds = [...new Set(data.items.flatMap(track => track.artists.map(artist => artist.id)))];
@@ -145,8 +149,9 @@ export default function SpotifyAuthScreen() {
       // });
       const data = await fetchFromAPI('following?type=artist', accessToken);
       const genreCounts = {};
+      
 
-      data.artists.items.forEach(artist => {
+      data.artists.items.forEach(artist => {   
         artist.genres.forEach(genre => {
           genreCounts[genre] = (genreCounts[genre] || 0) + 1;
         });
@@ -223,7 +228,7 @@ export default function SpotifyAuthScreen() {
 
       sortedGenres = Object.fromEntries(sortedGenres);
 
-      console.log("the combine==", sortedGenres);
+      // console.log("the combine==", sortedGenres);
       setGenres(sortedGenres);
     }
 

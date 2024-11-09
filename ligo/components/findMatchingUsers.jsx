@@ -25,7 +25,11 @@ function calculateCosineSimilarity(vectorA, vectorB) {
     const magnitudeA = Math.sqrt(Object.values(vectorA).reduce((sum, val) => sum + val ** 2, 0));
     const magnitudeB = Math.sqrt(Object.values(vectorB).reduce((sum, val) => sum + val ** 2, 0));
 
-    return dotProduct / (magnitudeA * magnitudeB);
+    const commonElements = Object.keys(vectorA).filter(genre => genre in vectorB);
+
+    const score = dotProduct / (magnitudeA * magnitudeB)
+
+    return { score, commonElements };
 }
 
 function calculateCompatibility(data1, data2) {
@@ -46,10 +50,10 @@ function calculateCompatibility(data1, data2) {
      }
  
     //  // Step 2.3: Genre Overlap
-    //  const genreSimilarityScore = calculateCosineSimilarity(data1.genreProfile, data2.genreProfile);
-    //  if (genreSimilarityScore >= THRESHOLD_GENRE) {
-    //      return { score: genreSimilarityScore, matchType: 'genre', matches: [] }; // No exact "common" genres, just similarity
-    //  }
+     const genreSimilarityScore = calculateCosineSimilarity(data1.genreProfile, data2.genreProfile);
+     if (genreSimilarityScore.score >= THRESHOLD_GENRE) {
+         return { score: genreSimilarityScore.score, matchType: 'genre', matches: genreSimilarityScore.commonElements }; // No exact "common" genres, just similarity
+     }
  
      return { score: 0, matchType: null, matches: [] }; // No significant compatibility found
 }
