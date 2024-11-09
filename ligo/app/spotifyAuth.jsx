@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
 const scope = ['user-top-read', 'user-follow-read', 'user-read-private']; // Add scope for reading followed artists and user profile
+console.log("redirect_uri",redirect_uri);
 
 export default function SpotifyAuthScreen() {
   const [accessToken, setAccessToken] = useState('');
