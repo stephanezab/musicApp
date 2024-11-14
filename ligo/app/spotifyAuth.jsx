@@ -9,12 +9,11 @@ import { getUserData } from '../components/getUserData';
 import { fetchFromAPI } from '../components/fetchFromAPI';
 import { getAccessToken } from '../components/getAccessToken';
 import { getUserLocation } from '../components/getUserLocation';
-import { useNavigation } from '@react-navigation/native';
+
 
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
 const scope = ['user-top-read', 'user-follow-read', 'user-read-private']; // Add scope for reading followed artists and user profile
-console.log("redirect_uri",redirect_uri);
 
 export default function SpotifyAuthScreen() {
   const [accessToken, setAccessToken] = useState('');
@@ -30,7 +29,6 @@ export default function SpotifyAuthScreen() {
   const [userProfile, setUserProfile] = useState(null); // New state for user profile
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
   const [isLoadingArtists, setIsLoadingArtists] = useState(false);
-  const navigation = useNavigation();
   const router = useRouter();
 
   const discovery = {
@@ -73,7 +71,7 @@ export default function SpotifyAuthScreen() {
       //   },
       // });
       const data = await getAccessToken(code, redirect_uri, client_id, request);
-      console.log("define the scope",data.scope);
+      //console.log("define the scope",data.scope);
       setAccessToken(data.access_token);
     } catch (error) {
       console.error('Error fetching access token:', error);
@@ -111,25 +109,25 @@ export default function SpotifyAuthScreen() {
       //console.log("top tracks===",data.items);
       setTracks(data.items);
 
-      const artistIds = [...new Set(data.items.flatMap(track => track.artists.map(artist => artist.id)))];
+      //const artistIds = [...new Set(data.items.flatMap(track => track.artists.map(artist => artist.id)))];
 
-      const genres = {};
+      //const genres = {};
 
-      for (const artistId of artistIds) {
+      // for (const artistId of artistIds) {
 
-        const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-        const artistData = await artistResponse.json();
+      //   const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+      //     headers: {
+      //       'Authorization': `Bearer ${accessToken}`
+      //     }
+      //   });
+      //   const artistData = await artistResponse.json();
 
-        artistData.genres.forEach(genre => {
-          genres[genre] = (genres[genre] || 0) + 1; // Counting genre occurrences
-        });
-      }
+      //   artistData.genres.forEach(genre => {
+      //     genres[genre] = (genres[genre] || 0) + 1; // Counting genre occurrences
+      //   });
+      // }
       // console.log("genres from songs====", genres);
-      setExtsongGenres(genres);
+      //setExtsongGenres(genres);
 
     } catch (error) {
       console.error('Error fetching top tracks:', error);
@@ -150,20 +148,42 @@ export default function SpotifyAuthScreen() {
       // });
       const data = await fetchFromAPI('following?type=artist', accessToken);
       const genreCounts = {};
-      
 
-      data.artists.items.forEach(artist => {   
-        artist.genres.forEach(genre => {
+      for (const artist of data.artists.items) {
+        const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artist.id}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+    
+        // Convert response to JSON
+        const artistData = await artistResponse.json();
+    
+        // Log the artist's popularity
+        console.log("popularity", artistData.name, artistData.popularity);
+    
+        // Count genres
+        artistData.genres.forEach(genre => {
           genreCounts[genre] = (genreCounts[genre] || 0) + 1;
         });
-      });
+      }
 
-      // let sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      // data.artists.items.forEach(artist => {   
+        
+      //   artist.genres.forEach(genre => {
+      //     genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+      //   });
+      // });
 
-      // sortedGenres = Object.fromEntries(sortedGenres);
+      let sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-      // console.log("genre artist====: " + JSON.stringify(genreCounts));
-      setExtartistGenres(genreCounts);
+      sortedGenres = Object.fromEntries(sortedGenres);
+
+      //console.log("genre artist====: " + JSON.stringify(genreCounts));
+
+      setGenres(sortedGenres);
+      
+      //setExtartistGenres(genreCounts);
 
 
       setArtists(data.artists.items);
@@ -217,24 +237,24 @@ export default function SpotifyAuthScreen() {
   //   }
   // }, [userProfile])
 
-  useEffect(() => {
-    if (Object.keys(extartistGenres).length > 0 && Object.keys(extsongGenres).length > 0) {
+  // useEffect(() => {
+  //   if (Object.keys(extartistGenres).length > 0 && Object.keys(extsongGenres).length > 0) {
 
-      let combinedGenres = { ...extsongGenres };
-      for (const genre in extartistGenres) {
-        combinedGenres[genre] = (combinedGenres[genre] || 0) + extartistGenres[genre];
-      }
+  //     let combinedGenres = { ...extsongGenres };
+  //     for (const genre in extartistGenres) {
+  //       combinedGenres[genre] = (combinedGenres[genre] || 0) + extartistGenres[genre];
+  //     }
 
-      let sortedGenres = Object.entries(combinedGenres).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  //     let sortedGenres = Object.entries(combinedGenres).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-      sortedGenres = Object.fromEntries(sortedGenres);
+  //     sortedGenres = Object.fromEntries(sortedGenres);
 
-      // console.log("the combine==", sortedGenres);
-      setGenres(sortedGenres);
-    }
+  //     // console.log("the combine==", sortedGenres);
+  //     setGenres(sortedGenres);
+  //   }
 
 
-  }, [extartistGenres, extsongGenres])
+  // }, [extartistGenres, extsongGenres])
 
 
   const handlesearch = () => {

@@ -135,3 +135,21 @@ THRESHOLD_ARTIST = 0.5  # Define as per requirement
 THRESHOLD_SONG = 0.5    # Define as per requirement
 
 
+
+# Modified Jaccard Index to account for weights
+function calculateWeightedJaccardIndex(weightedSetA, weightedSetB):
+    intersectionSum = 0
+    unionSum = 0
+    
+    # Combine all unique elements from both sets
+    uniqueItems = set(weightedSetA.keys()).union(set(weightedSetB.keys()))
+    
+    for item in uniqueItems:
+        weightA = weightedSetA.get(item, 0)  # Default weight is 0 if item not present
+        weightB = weightedSetB.get(item, 0)
+        
+        # Minimum weight for intersection, maximum for union
+        intersectionSum += min(weightA, weightB)
+        unionSum += max(weightA, weightB)
+    
+    return intersectionSum / unionSum if unionSum != 0 else 0  # Handle divide by zero case

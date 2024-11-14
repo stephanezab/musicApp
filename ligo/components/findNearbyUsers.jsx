@@ -18,7 +18,7 @@ export const findNearbyUsers = async(currentLat, currentLon, userId, maxDistance
     
       const { latitude, longitude } = userData.location;
       const distance = findDistance(currentLat, currentLon, latitude, longitude);
-      console.log("distance" + distance)
+      // console.log("distance" + distance)
 
       if (distance <= maxDistance) {
         nearbyUsers.push({

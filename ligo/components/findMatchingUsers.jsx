@@ -44,7 +44,7 @@ function calculateCompatibility(data1, data2) {
      
      // Step 2.2: Song Overlap
      const songOverlap = calculateJaccardIndex(data1.topSongs, data2.topSongs);
-     console.log("song part",songOverlap);
+     
      if (songOverlap.score >= THRESHOLD_SONG) {
          return { score: songOverlap.score, matchType: 'song', matches: songOverlap.commonElements };
      }
