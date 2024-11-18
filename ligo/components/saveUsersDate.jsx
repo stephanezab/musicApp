@@ -3,6 +3,13 @@ import { db } from "../firebaseConfig";
 
 
 export const saveUserData = async (userId, name, latitude, longitude, topSongs, favoriteArtists, genres) => {
+    // console.log("userId:",userId)
+    // console.log("name:",name)
+    // console.log("coordonate:", latitude, longitude)
+    // console.log("topsongs:",topSongs)
+    // console.log("favoriteArtist:",favoriteArtists)
+    // console.log("genres:",genres)
+    
     try {
         await setDoc(doc(db, "users", userId), {
             name: name,

@@ -7,6 +7,29 @@ const THRESHOLD_GENRE = 0.5;
 //     return array1.filter(value => array2.includes(value));
 // }
 
+// Function to calculate the weighted Jaccard Index
+function calculateWeightedJaccardIndex(weightedSetA, weightedSetB) {
+    let intersectionSum = 0;
+    let unionSum = 0;
+
+    // Combine all unique elements from both sets
+    const uniqueItems = new Set([
+        ...Object.keys(weightedSetA),
+        ...Object.keys(weightedSetB)
+    ]);
+
+    uniqueItems.forEach((item) => {
+        const weightA = weightedSetA[item] || 0; // Default weight is 0 if item not present
+        const weightB = weightedSetB[item] || 0;
+
+        // Minimum weight for intersection, maximum for union
+        intersectionSum += Math.min(weightA, weightB);
+        unionSum += Math.max(weightA, weightB);
+    });
+
+    return unionSum === 0 ? 0 : intersectionSum / unionSum; // Handle divide by zero case
+}
+
 function calculateJaccardIndex(setA, setB) {
     // console.log("setA",setA);
     // console.log("setB",setB);

@@ -9,6 +9,7 @@ import { getUserData } from '../components/getUserData';
 import { fetchFromAPI } from '../components/fetchFromAPI';
 import { getAccessToken } from '../components/getAccessToken';
 import { getUserLocation } from '../components/getUserLocation';
+import {assignWeight} from '../components/assignWeight';
 
 
 const client_id = Constants.expoConfig.extra.clientId;
@@ -147,46 +148,60 @@ export default function SpotifyAuthScreen() {
       //   },
       // });
       const data = await fetchFromAPI('following?type=artist', accessToken);
+      const data_short = await fetchFromAPI('top/artists?time_range=short_term&limit=10', accessToken);
+      const data_medium = await fetchFromAPI('top/artists?time_range=medium_term&limit=10', accessToken);
+      const data_long = await fetchFromAPI('top/artists?time_range=long_term&limit=10', accessToken);
       const genreCounts = {};
 
-      for (const artist of data.artists.items) {
-        const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artist.id}`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-    
-        // Convert response to JSON
-        const artistData = await artistResponse.json();
-    
-        // Log the artist's popularity
-        console.log("popularity", artistData.name, artistData.popularity);
-    
-        // Count genres
-        artistData.genres.forEach(genre => {
-          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-        });
-      }
+      const shortArtists = data_short.items.map(artist => artist.name);
+      const mediumArtists = data_medium.items.map(artist => artist.name);
+      const longArtists = data_long.items.map(artist => artist.name);
 
-      // data.artists.items.forEach(artist => {   
-        
-      //   artist.genres.forEach(genre => {
+      // console.log("short term", shortArtists);
+      // console.log("medium", mediumArtists);
+      // console.log("long", longArtists);
+      const listmap = assignWeight(shortArtists, mediumArtists, longArtists);
+      console.log("final weight:", listmap)
+
+      // for (const artist of data.artists.items) {
+      //   const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artist.id}`, {
+      //     headers: {
+      //       'Authorization': `Bearer ${accessToken}`
+      //     }
+      //   });
+
+      //   // Convert response to JSON
+      //   const artistData = await artistResponse.json();
+
+      //   // Log the artist's popularity
+      //   console.log("popularity", artistData.name, artistData.popularity);
+
+      //   // Count genres
+      //   artistData.genres.forEach(genre => {
       //     genreCounts[genre] = (genreCounts[genre] || 0) + 1;
       //   });
-      // });
+      // }
+
+      data.artists.items.forEach(artist => {
+
+        artist.genres.forEach(genre => {
+          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+        });
+      });
 
       let sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
       sortedGenres = Object.fromEntries(sortedGenres);
 
-      //console.log("genre artist====: " + JSON.stringify(genreCounts));
+      console.log("genre artist====: " + JSON.stringify(genreCounts));
 
       setGenres(sortedGenres);
-      
+
       //setExtartistGenres(genreCounts);
 
 
       setArtists(data.artists.items);
+
     } catch (error) {
       console.error('Error fetching followed artists:', error);
     }
