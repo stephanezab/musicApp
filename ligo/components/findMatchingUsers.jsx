@@ -26,8 +26,10 @@ function calculateWeightedJaccardIndex(weightedSetA, weightedSetB) {
         intersectionSum += Math.min(weightA, weightB);
         unionSum += Math.max(weightA, weightB);
     });
+    const commonElements = Object.keys(weightedSetA).filter(artist => artist in weightedSetB);
+    const score = intersectionSum / unionSum;
 
-    return unionSum === 0 ? 0 : intersectionSum / unionSum; // Handle divide by zero case
+    return { score, commonElements }; // Handle divide by zero case
 }
 
 function calculateJaccardIndex(setA, setB) {
@@ -59,7 +61,8 @@ function calculateCompatibility(data1, data2) {
 
      // Step 2.1: Artist Overlap
 
-     const artistOverlap = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
+     //const artistOverlap = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
+     const artistOverlap = calculateWeightedJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
      
      if (artistOverlap.score >= THRESHOLD_ARTIST) {
          return { score: artistOverlap.score, matchType: 'artist', matches: artistOverlap.commonElements };

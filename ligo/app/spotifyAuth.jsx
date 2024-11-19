@@ -161,7 +161,9 @@ export default function SpotifyAuthScreen() {
       // console.log("medium", mediumArtists);
       // console.log("long", longArtists);
       const listmap = assignWeight(shortArtists, mediumArtists, longArtists);
-      console.log("final weight:", listmap)
+      console.log("final weight:", listmap);
+
+      const artistArray = Object.entries(listmap).map(([name, score]) => ({ name, score }));
 
       // for (const artist of data.artists.items) {
       //   const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artist.id}`, {
@@ -200,7 +202,7 @@ export default function SpotifyAuthScreen() {
       //setExtartistGenres(genreCounts);
 
 
-      setArtists(data.artists.items);
+      setArtists(artistArray);
 
     } catch (error) {
       console.error('Error fetching followed artists:', error);
@@ -230,11 +232,16 @@ export default function SpotifyAuthScreen() {
         const userId = userProfile.id;
         const userName = userProfile.display_name;
         const topSongs = tracks.map((track) => track.name);
-        const favoriteArtists = artists.map((artist) => artist.name);
+        //const favoriteArtists = artists.map((artist) => artist.name);
+        const favoriteArtists = artists.reduce((map, artist) => {
+          map[artist.name] = artist.score;
+          return map;
+        }, {});
 
         // Await the async function to get the location
         const { latitude, longitude } = await getUserLocation();
-        // console.log(latitude, longitude);
+        // console.log(latitude, longitude)
+
 
         // Call the function to save user data with the location
         saveUserData(userId, userName, latitude, longitude, topSongs, favoriteArtists, Genres);
@@ -293,16 +300,11 @@ export default function SpotifyAuthScreen() {
 
   const renderArtistItem = ({ item }) => (
     <View style={styles.artistContainer}>
-      {item.images.length > 0 && (
-        <Image source={{ uri: item.images[0].url }} style={styles.artistImage} />
-      )}
-      <View style={styles.artistInfoContainer}>
-        <Text style={styles.artistName}>{item.name}</Text>
-        <Text style={styles.artistGenres}>
-          {item.genres && item.genres.length > 0 ? item.genres.join(', ') : 'No genres available'}
-        </Text>
-      </View>
+    <View style={styles.artistInfoContainer}>
+      <Text style={styles.artistName}>{item.name}</Text>
+      <Text style={styles.artistGenres}>Score: {item.score}</Text>
     </View>
+  </View>
   );
 
   return (
@@ -328,14 +330,14 @@ export default function SpotifyAuthScreen() {
             />
           )}
 
-          <Text style={styles.title}>Followed Artists</Text>
+          <Text style={styles.title}>Top Artists</Text>
           {isLoadingArtists ? (
             <ActivityIndicator size="large" color="#00ff00" />
           ) : (
             <FlatList
               data={artists}
               renderItem={renderArtistItem}
-              keyExtractor={(item, index) => index.toString()}
+              keyExtractor={(item) => item.name}
               style={styles.list}
             />
           )}
@@ -399,8 +401,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   artistName: {
-    fontSize: 14,
-    color: '#A0A0A0',
+    fontSize: 18,
+    color: '#FFFFFF',
     marginLeft: 0,
   },
   artistImage: {
@@ -409,7 +411,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   artistGenres: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#A0A0A0',
     marginTop: 10,
   },
