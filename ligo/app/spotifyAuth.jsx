@@ -14,7 +14,7 @@ import {assignWeight} from '../components/assignWeight';
 
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
-const scope = ['user-top-read', 'user-follow-read', 'user-read-private']; // Add scope for reading followed artists and user  profile
+const scope = ['user-top-read', 'user-follow-read', 'user-read-private']; // Add scope for reading followed artists and user profile
 
 export default function SpotifyAuthScreen() {
   const [accessToken, setAccessToken] = useState('');
