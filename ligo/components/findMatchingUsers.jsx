@@ -67,6 +67,13 @@ function calculateCompatibility(data1, data2) {
      if (artistOverlap.score >= THRESHOLD_ARTIST) {
          return { score: artistOverlap.score, matchType: 'artist', matches: artistOverlap.commonElements };
      }
+
+    //  const artistOverlap2 = calculateJaccardIndex(Object.keys(data1.favoriteArtists), Object.keys(data2.favoriteArtists));
+     
+    //  if (artistOverlap2.score >= THRESHOLD_ARTIST) {
+    //      return { score: artistOverlap2.score, matchType: 'artist', matches: artistOverlap2.commonElements };
+    //  }
+
      
      // Step 2.2: Song Overlap
      const songOverlap = calculateJaccardIndex(data1.topSongs, data2.topSongs);
