@@ -4,23 +4,28 @@ import axios from 'axios';
 import { Link, useRouter } from 'expo-router';
 import * as AuthSession from 'expo-auth-session';
 import Constants from 'expo-constants';
-import { saveUserData } from '../components/saveUsersDate';
-import { getUserData } from '../components/getUserData';
-import { fetchFromAPI } from '../components/fetchFromAPI';
-import { getAccessToken } from '../components/getAccessToken';
-import { getUserLocation } from '../components/getUserLocation';
-import {assignWeight} from '../components/assignWeight';
+import { saveUserData } from '@/lib/saveUsersDate';
+import { getUserData } from '@/lib/getUserData';
+import { fetchFromAPI } from '@/lib/fetchFromAPI';
+import { getAccessToken } from '@/lib/getAccessToken';
+import { getUserLocation } from '@/lib/getUserLocation';
+import { assignWeight } from '@/lib/assignWeight';
+import { getUserMoodProfile } from '@/lib/getUserMoodProfile';
 
 
 const client_id = Constants.expoConfig.extra.clientId;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
 const scope = [
-  'user-top-read', 
-  'user-follow-read', 
+  'user-top-read',
+  'user-follow-read',
   'user-read-private',
-  'user-read-email']; // Add scope for reading followed artists and user profile Stephane
+  'user-read-email',
+  'playlist-read-private',
+  'user-library-read'
+]; // Add scope here
 
 export default function SpotifyAuthScreen() {
+
   const [accessToken, setAccessToken] = useState('');
   const [authorizationCode, setAuthorizationCode] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -31,7 +36,7 @@ export default function SpotifyAuthScreen() {
   const [extartistGenres, setExtartistGenres] = useState({});
   const [Genres, setGenres] = useState({});
 
-  const [userProfile, setUserProfile] = useState(null); // New state for user profile
+  const [userProfile, setUserProfile] = useState(null); 
   const [isLoadingTracks, setIsLoadingTracks] = useState(false);
   const [isLoadingArtists, setIsLoadingArtists] = useState(false);
   const router = useRouter();
@@ -63,18 +68,7 @@ export default function SpotifyAuthScreen() {
 
   const getToken = async (code) => {
     try {
-      // const response = await axios.post('https://accounts.spotify.com/api/token', null, {
-      //   params: {
-      //     grant_type: 'authorization_code',
-      //     code: code,
-      //     redirect_uri: redirect_uri,
-      //     client_id: client_id,
-      //     code_verifier: request?.codeVerifier, // PKCE
-      //   },
-      //   headers: {
-      //     'Content-Type': 'application/x-www-form-urlencoded',
-      //   },
-      // });
+    
       const data = await getAccessToken(code, redirect_uri, client_id, request);
       //console.log("define the scope",data.scope);
       setAccessToken(data.access_token);
@@ -104,33 +98,22 @@ export default function SpotifyAuthScreen() {
     }
     setIsLoadingTracks(true);
     try {
-      // const response = await axios.get('https://api.spotify.com/v1/me/top/tracks', {
-      //   headers: {
-      //     Authorization: `Bearer ${accessToken}`,
-      //   },
-      // });
-      const data = await fetchFromAPI('top/tracks?offset=0&limit=10', accessToken);
+      
+      const data = await fetchFromAPI('me/top/tracks?offset=0&limit=10', accessToken);
+      
 
       //console.log("top tracks===",data.items);
+      const trackIds = data.items.map((track) => track.id);
+
+      // const data2 = await fetchFromAPI(`audio-features/${trackIds[0]}`, accessToken);
+
+      // console.log("=========", data2);
+
+      // const mood = getUserMoodProfile(audioFeatures);
+      // console.log("MOOD:===", mood);
       setTracks(data.items);
+      
 
-      //const artistIds = [...new Set(data.items.flatMap(track => track.artists.map(artist => artist.id)))];
-
-      //const genres = {};
-
-      // for (const artistId of artistIds) {
-
-      //   const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
-      //     headers: {
-      //       'Authorization': `Bearer ${accessToken}`
-      //     }
-      //   });
-      //   const artistData = await artistResponse.json();
-
-      //   artistData.genres.forEach(genre => {
-      //     genres[genre] = (genres[genre] || 0) + 1; // Counting genre occurrences
-      //   });
-      // }
       // console.log("genres from songs====", genres);
       //setExtsongGenres(genres);
 
@@ -140,21 +123,18 @@ export default function SpotifyAuthScreen() {
     setIsLoadingTracks(false);
   };
 
-  const fetchFollowedArtists = async () => {
+  const fetchTopArtists = async () => {
     if (!accessToken) {
       return;
     }
     setIsLoadingArtists(true);
     try {
-      // const response = await axios.get('https://api.spotify.com/v1/me/following?type=artist', {
-      //   headers: {
-      //     Authorization: `Bearer ${accessToken}`,
-      //   },
-      // });
-      const data = await fetchFromAPI('following?type=artist', accessToken);
-      const data_short = await fetchFromAPI('top/artists?time_range=short_term&limit=10', accessToken);
-      const data_medium = await fetchFromAPI('top/artists?time_range=medium_term&limit=10', accessToken);
-      const data_long = await fetchFromAPI('top/artists?time_range=long_term&limit=10', accessToken);
+      
+
+      const data = await fetchFromAPI('me/following?type=artist', accessToken);
+      const data_short = await fetchFromAPI('me/top/artists?time_range=short_term&limit=10', accessToken);
+      const data_medium = await fetchFromAPI('me/top/artists?time_range=medium_term&limit=10', accessToken);
+      const data_long = await fetchFromAPI('me/top/artists?time_range=long_term&limit=10', accessToken);
       const genreCounts = {};
 
       const shortArtists = data_short.items.map(artist => artist.name);
@@ -169,24 +149,6 @@ export default function SpotifyAuthScreen() {
 
       const artistArray = Object.entries(listmap).map(([name, score]) => ({ name, score }));
 
-      // for (const artist of data.artists.items) {
-      //   const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${artist.id}`, {
-      //     headers: {
-      //       'Authorization': `Bearer ${accessToken}`
-      //     }
-      //   });
-
-      //   // Convert response to JSON
-      //   const artistData = await artistResponse.json();
-
-      //   // Log the artist's popularity
-      //   console.log("popularity", artistData.name, artistData.popularity);
-
-      //   // Count genres
-      //   artistData.genres.forEach(genre => {
-      //     genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-      //   });
-      // }
 
       data.artists.items.forEach(artist => {
 
@@ -205,7 +167,6 @@ export default function SpotifyAuthScreen() {
 
       //setExtartistGenres(genreCounts);
 
-
       setArtists(artistArray);
 
     } catch (error) {
@@ -214,18 +175,20 @@ export default function SpotifyAuthScreen() {
     setIsLoadingArtists(false);
   };
 
+  // get access token call 
   useEffect(() => {
     if (authorizationCode) {
       getToken(authorizationCode);
     }
   }, [authorizationCode]);
 
+  // fetch top tracks and top artists call 
   useEffect(() => {
     if (accessToken) {
       setIsLoggedIn(true);
       fetchUserProfile(); // Fetch user profile after logging in
       fetchTopTracks();
-      fetchFollowedArtists();
+      fetchTopArtists();
     }
   }, [accessToken]);
 
@@ -256,31 +219,6 @@ export default function SpotifyAuthScreen() {
 
   }, [userProfile, tracks, artists, Genres]);
 
-  // useEffect(()=>{
-  //   if (userProfile){
-
-  //     getUserData(userProfile.id)
-  //   }
-  // }, [userProfile])
-
-  // useEffect(() => {
-  //   if (Object.keys(extartistGenres).length > 0 && Object.keys(extsongGenres).length > 0) {
-
-  //     let combinedGenres = { ...extsongGenres };
-  //     for (const genre in extartistGenres) {
-  //       combinedGenres[genre] = (combinedGenres[genre] || 0) + extartistGenres[genre];
-  //     }
-
-  //     let sortedGenres = Object.entries(combinedGenres).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-  //     sortedGenres = Object.fromEntries(sortedGenres);
-
-  //     // console.log("the combine==", sortedGenres);
-  //     setGenres(sortedGenres);
-  //   }
-
-
-  // }, [extartistGenres, extsongGenres])
 
 
   const handlesearch = () => {
@@ -304,11 +242,11 @@ export default function SpotifyAuthScreen() {
 
   const renderArtistItem = ({ item }) => (
     <View style={styles.artistContainer}>
-    <View style={styles.artistInfoContainer}>
-      <Text style={styles.artistName}>{item.name}</Text>
-      <Text style={styles.artistGenres}>Score: {item.score}</Text>
+      <View style={styles.artistInfoContainer}>
+        <Text style={styles.artistName}>{item.name}</Text>
+        <Text style={styles.artistGenres}>Score: {item.score}</Text>
+      </View>
     </View>
-  </View>
   );
 
   return (

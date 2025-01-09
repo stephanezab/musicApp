@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
-import { fetchFromAPI } from '../components/fetchFromAPI';
+import { fetchFromAPI } from '@/lib/fetchFromAPI';
 
 export default function Music() {
   const [tracks, setTracks] = useState([]);

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { getUserLocation } from '../components/getUserLocation';
-import { findNearbyUsers } from '../components/findNearbyUsers';
-import { findMatchingUsers } from '../components/findMatchingUsers';
-import { getUserData } from '../components/getUserData';
+import { getUserLocation } from '@/lib/getUserLocation';
+import { findNearbyUsers } from '@/lib/findNearbyUsers';
+import { findMatchingUsers } from '@/lib/findMatchingUsers';
+import { getUserData } from '@/lib/getUserData';
 
 export default function DisplayMatches() {
     const [usersfoundByLocation, setUsersfoundByLocation] = useState([]);
@@ -15,6 +15,7 @@ export default function DisplayMatches() {
 
     const { id } = useLocalSearchParams();
 
+    // get user location 
     const getcurrentLocation = async () => {
         try {
             const { latitude, longitude } = await getUserLocation();
@@ -24,6 +25,8 @@ export default function DisplayMatches() {
             console.log("Error getting location", error);
         }
     };
+
+    // get other users data in a 20 mile radius 
 
     const getusers = async () => {
         if (latitude !== null && longitude !== null) {
@@ -35,6 +38,8 @@ export default function DisplayMatches() {
             }
         }
     };
+
+    // get current user data 
 
     const getcurrUserData = async () => {
         try {
@@ -57,6 +62,7 @@ export default function DisplayMatches() {
         getcurrUserData();
     }, [id]);
 
+    // finding users that matches with the current user
     useEffect(() => {
         if (usersfoundByLocation.length > 0 && currUserData) {
             const users = findMatchingUsers(currUserData, usersfoundByLocation);
