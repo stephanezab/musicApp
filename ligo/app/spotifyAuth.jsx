@@ -13,7 +13,7 @@ import { assignWeight } from '@/lib/assignWeight';
 import { getUserMoodProfile } from '@/lib/getUserMoodProfile';
 
 
-const client_id = Constants.expoConfig.extra.clientId;
+const client_id = process.env.EXPO_PUBLIC_CLIENT_ID;
 const redirect_uri = AuthSession.makeRedirectUri({ useProxy: true });
 const scope = [
   'user-top-read',
@@ -108,6 +108,7 @@ export default function SpotifyAuthScreen() {
       // const data2 = await fetchFromAPI(`audio-features/${trackIds[0]}`, accessToken);
 
       // console.log("=========", data2);
+      //console.log("PROCESS=========", process.env.EXPO_PUBLIC_CLIENT_ID);
 
       // const mood = getUserMoodProfile(audioFeatures);
       // console.log("MOOD:===", mood);
