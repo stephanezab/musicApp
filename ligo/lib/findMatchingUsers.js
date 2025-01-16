@@ -65,7 +65,7 @@ function calculateCosineSimilarity(vectorA, vectorB) {
 // Function to calculate similarity for a single mood metric
 function calculateMoodSimilarity(value1, value2) {
     const moodDifference = Math.abs(value1 - value2);
-    return 1 - (moodDifference / MAX_MOOD_DIFFERENCE); //Normalize the similarity to a range of 0 to 1
+    return 1 - (moodDifference / MAX_MOOD_DIFFERENCE); // Normalize the similarity to a range of 0 to 1
 }
 
 // Function to calculate overall mood similarity
