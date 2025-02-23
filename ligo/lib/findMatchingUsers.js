@@ -81,18 +81,18 @@ function calculateCompatibility(data1, data2) {
 
     // Step 2.1: Artist Overlap
 
-    //const artistOverlap = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
-    const artistOverlap = calculateWeightedJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
+    const artistOverlap = calculateJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
+    //const artistOverlap = calculateWeightedJaccardIndex(data1.favoriteArtists, data2.favoriteArtists);
 
     if (artistOverlap.score >= THRESHOLD_ARTIST) {
         return { score: artistOverlap.score, matchType: 'artist', matches: artistOverlap.commonElements };
     }
 
-    const artistOverlap2 = calculateJaccardIndex(Object.keys(data1.favoriteArtists), Object.keys(data2.favoriteArtists));
+    // const artistOverlap2 = calculateJaccardIndex(Object.keys(data1.favoriteArtists), Object.keys(data2.favoriteArtists));
 
-    if (artistOverlap2.score >= THRESHOLD_ARTIST) {
-        return { score: artistOverlap2.score, matchType: 'artist', matches: artistOverlap2.commonElements };
-    }
+    // if (artistOverlap2.score >= THRESHOLD_ARTIST) {
+    //     return { score: artistOverlap2.score, matchType: 'artist', matches: artistOverlap2.commonElements };
+    // }
 
 
     // Step 2.2: Song Overlap

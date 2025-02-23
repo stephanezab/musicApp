@@ -99,11 +99,12 @@ export default function SpotifyAuthScreen() {
     setIsLoadingTracks(true);
     try {
       
-      const data = await fetchFromAPI('me/top/tracks?offset=0&limit=10', accessToken);
+      const data = await fetchFromAPI('me/top/tracks?time_range=long_term&offset=0&limit=10', accessToken);
+      
       
 
       //console.log("top tracks===",data.items);
-      const trackIds = data.items.map((track) => track.id);
+      //const trackIds = data.items.map((track) => track.id);
 
       // const data2 = await fetchFromAPI(`audio-features/${trackIds[0]}`, accessToken);
 
@@ -168,7 +169,7 @@ export default function SpotifyAuthScreen() {
 
       //setExtartistGenres(genreCounts);
 
-      setArtists(artistArray);
+      setArtists(data.artists.items);
 
     } catch (error) {
       console.error('Error fetching followed artists:', error);
@@ -200,11 +201,11 @@ export default function SpotifyAuthScreen() {
         const userId = userProfile.id;
         const userName = userProfile.display_name;
         const topSongs = tracks.map((track) => track.name);
-        //const favoriteArtists = artists.map((artist) => artist.name);
-        const favoriteArtists = artists.reduce((map, artist) => {
-          map[artist.name] = artist.score;
-          return map;
-        }, {});
+        const favoriteArtists = artists.map((artist) => artist.name);
+        // const favoriteArtists = artists.reduce((map, artist) => {
+        //   map[artist.name] = artist.score;
+        //   return map;
+        // }, {});
 
         // Await the async function to get the location
         const { latitude, longitude } = await getUserLocation();
@@ -243,11 +244,17 @@ export default function SpotifyAuthScreen() {
 
   const renderArtistItem = ({ item }) => (
     <View style={styles.artistContainer}>
-      <View style={styles.artistInfoContainer}>
-        <Text style={styles.artistName}>{item.name}</Text>
-        <Text style={styles.artistGenres}>Score: {item.score}</Text>
-      </View>
+    <Image source={{ uri: item.images[0]?.url }} style={styles.artistImage} />
+    <View style={styles.artistInfoContainer}>
+      <Text style={styles.artistName}>{item.name}</Text>
     </View>
+  </View>
+    // <View style={styles.artistContainer}>
+    //   <View style={styles.artistInfoContainer}>
+    //     <Text style={styles.artistName}>{item.name}</Text>
+    //     <Text style={styles.artistGenres}>Score: {item.score}</Text>
+    //   </View>
+    // </View>
   );
 
   return (
