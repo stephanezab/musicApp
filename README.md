@@ -1,8 +1,8 @@
 # Ligo - Music Compatibility App
 
+Ligo is a React Native app designed to help users find people with similar music tastes within a 20-mile radius. The app compares users based on their top songs, top artists, and music genres, providing a percentage match and showing which artists, songs, or genres they have in common.
 <img src="https://github.com/user-attachments/assets/645d6f58-0801-44fd-bfab-d159199d4cfa" width="500" height="auto" />
 
-Ligo is a React Native app designed to help users find people with similar music tastes within a 20-mile radius. The app compares users based on their top songs, top artists, and music genres, providing a percentage match and showing which artists, songs, or genres they have in common.
 
 
 ## Features
